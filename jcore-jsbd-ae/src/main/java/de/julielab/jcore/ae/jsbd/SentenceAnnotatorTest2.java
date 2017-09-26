@@ -63,20 +63,20 @@ public class SentenceAnnotatorTest2 {
 	// private static final int[] endOffsets = { 54, 32, 27, 0 };
 
 	public static void main(String[] args) throws Exception {
-		if (args.length > 0) {
+		if (args.length == 2) {
 			AnalysisEngine sentenceAE = AnalysisEngineFactory.createEngine(SentenceAnnotator.class,
 					SentenceAnnotator.PARAM_MODEL_FILE,
-					"/home/grygorova/git/jcore/jcore-base/jcore-jsbd-ae/src/test/resources/de/julielab/jcore/ae/jsbd/model/test-model.gz",
+					args[1],
 					SentenceAnnotator.PARAM_POSTPROCESSING, "biomed");
 			JCas cas = JCasFactory.createJCas("de.julielab.jcore.types.jcore-morpho-syntax-types");
 			String abstractText = FileUtils.readFileToString(new File(args[0]), "UTF-8");
 			cas.setDocumentText(abstractText);
 			sentenceAE.process(cas);
 			Collection<Sentence> sentences = JCasUtil.select(cas, Sentence.class);
-			// for (Sentence sentence : sentences) {
-			// System.out.println(sentence.getCoveredText());
-			// }
-			// System.out.println("sentence number: " + sentences.size());
+			 for (Sentence sentence : sentences) {
+			 System.out.println(sentence.getCoveredText());
+			 }
+			 System.out.println("sentence number: " + sentences.size());
 
 			JFSIndexRepository indexes = cas.getJFSIndexRepository();
 			Iterator<?> sentIter = indexes.getAnnotationIndex(Sentence.type).iterator();
@@ -84,7 +84,7 @@ public class SentenceAnnotatorTest2 {
 			System.out.println(offsets);
 			// assertEquals(19, sentences.size());
 		} else {
-			System.out.println("usage: <path to text file>");
+			System.out.println("usage: <path to text file> <path to model file>");
 		}
 	}
 

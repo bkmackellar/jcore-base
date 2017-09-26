@@ -44,6 +44,7 @@ import org.apache.uima.jcas.tcas.Annotation;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.resource.ResourceSpecifier;
 import org.apache.uima.util.XMLInputSource;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +62,7 @@ public class SentenceAnnotatorTest {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(SentenceAnnotatorTest.class);
 
-	private static final String LOGGER_PROPERTIES = "src/test/java/log4j.properties";
+	//private static final String LOGGER_PROPERTIES = "src/test/java/log4j.properties";
 
 	// uncomment to test with/without scope
 	// private static final String DESCRIPTOR =
@@ -76,6 +77,47 @@ public class SentenceAnnotatorTest {
 	private static final String[] TEST_TEXT_OFFSETS = { "0-15;16-34;40-54", "0-17;18-32", "0-7;8-38;39-56", "" };
 
 	private static final int[] endOffsets = { 54, 32, 27, 0 };
+	
+	@Test
+	public void testProcessOnTestFile() throws Exception {
+		AnalysisEngine sentenceAE = AnalysisEngineFactory.createEngine(SentenceAnnotator.class,
+				SentenceAnnotator.PARAM_MODEL_FILE, "de/julielab/jcore/ae/jsbd/model/test-model.gz",
+				SentenceAnnotator.PARAM_POSTPROCESSING, "biomed");
+		JCas cas = JCasFactory.createJCas("de.julielab.jcore.types.jcore-morpho-syntax-types");
+		String abstractText = FileUtils.readFileToString(new File("src/test/resources/example.txt"), "UTF-8");
+		cas.setDocumentText(abstractText);
+		sentenceAE.process(cas);
+		Collection<Sentence> sentences = JCasUtil.select(cas, Sentence.class);
+		for (Sentence sentence : sentences) {
+			System.out.println(sentence.getCoveredText());
+		}
+		System.out.println("sentence number: " + sentences.size());
+		
+		JFSIndexRepository indexes = cas.getJFSIndexRepository();
+		Iterator<?> sentIter = indexes.getAnnotationIndex(Sentence.type).iterator();
+		String offsets = getSentenceOffsets(sentIter);
+		System.out.println(offsets);
+		//assertEquals(19, sentences.size());
+	}
+	
+	private String getSentenceOffsets(Iterator<?> sentIter) {
+		String predictedOffsets = "";
+		while (sentIter.hasNext()) {
+			Sentence s = (Sentence) sentIter.next();
+			System.out.println(s.getBegin() + " - " + s.getEnd() + " sentence");
+			//LOGGER.debug("sentence: " + s.getCoveredText() + ": " + s.getBegin() + " - " + s.getEnd());
+			predictedOffsets += (predictedOffsets.length() > 0) ? ";" : "";
+			predictedOffsets += s.getBegin() + "-" + s.getEnd();
+		}
+		
+//		if (LOGGER.isDebugEnabled()) {
+//			LOGGER.debug("testProcess() - predicted: " + predictedOffsets);
+//		}
+//		if (LOGGER.isDebugEnabled()) {
+//			LOGGER.debug("testProcess() - wanted: " + TEST_TEXT_OFFSETS[i]);
+//		}
+		return predictedOffsets;
+	}
 
 	/**
 	 * Use the model in resources, split the text in TEST_TEXT and compare the
@@ -127,7 +169,7 @@ public class SentenceAnnotatorTest {
 
 			// get the offsets of the sentences
 			JFSIndexRepository indexes = jcas.getJFSIndexRepository();
-			Iterator sentIter = indexes.getAnnotationIndex(Sentence.type).iterator();
+			Iterator<?> sentIter = indexes.getAnnotationIndex(Sentence.type).iterator();
 
 			String predictedOffsets = getPredictedOffsets(i, sentIter);
 			
@@ -141,15 +183,16 @@ public class SentenceAnnotatorTest {
 	}
 
 
-	private String getPredictedOffsets(int i, Iterator sentIter) {
+	private String getPredictedOffsets(int i, Iterator<?> sentIter) {
 		String predictedOffsets = "";
 		while (sentIter.hasNext()) {
 			Sentence s = (Sentence) sentIter.next();
-			LOGGER.debug("sentence: " + s.getCoveredText() + ": " + s.getBegin() + " - " + s.getEnd());
+			System.out.println(s.getBegin() + " - " + s.getEnd() + " sentence");
+			//LOGGER.debug("sentence: " + s.getCoveredText() + ": " + s.getBegin() + " - " + s.getEnd());
 			predictedOffsets += (predictedOffsets.length() > 0) ? ";" : "";
 			predictedOffsets += s.getBegin() + "-" + s.getEnd();
 		}
-
+		
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("testProcess() - predicted: " + predictedOffsets);
 		}
@@ -169,9 +212,9 @@ public class SentenceAnnotatorTest {
 		cas.setDocumentText(abstractText);
 		sentenceAE.process(cas);
 		Collection<Sentence> sentences = JCasUtil.select(cas, Sentence.class);
-		for (Sentence sentence : sentences) {
-			System.out.println(sentence.getCoveredText());
-		}
+//		for (Sentence sentence : sentences) {
+//			System.out.println(sentence.getCoveredText());
+//		}
 		assertEquals(14, sentences.size());
 	}
 
@@ -186,9 +229,9 @@ public class SentenceAnnotatorTest {
 		sentenceAE.process(cas);
 		Collection<Sentence> sentences = JCasUtil.select(cas, Sentence.class);
 		System.out.println(sentences.size());
-		for (Sentence sentence : sentences) {
-			System.out.println(sentence.getCoveredText());
-		}
+//		for (Sentence sentence : sentences) {
+//			System.out.println(sentence.getCoveredText());
+//		}
 		assertEquals(14, sentences.size());
 	}
 

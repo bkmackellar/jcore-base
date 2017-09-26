@@ -36,10 +36,10 @@ public class TokenAnnotatorTest2 // extends TestCase {
 
 	public static void main(String[] args) throws Exception {
 
-		if (args.length > 0) {
+		if (args.length == 2) {
 			AnalysisEngine sentenceAE = AnalysisEngineFactory.createEngine(TokenAnnotator.class,
 					TokenAnnotator.PARAM_MODEL,
-					"/home/grygorova/git/jcore/jcore-base/jcore-jtbd-ae/src/test/resources/de/julielab/jcore/ae/jtbd/model/test-model.gz",
+					args[1],
 					TokenAnnotator.USE_DOC_TEXT_PARAM, true);
 			JCas cas = JCasFactory.createJCas("de.julielab.jcore.types.jcore-morpho-syntax-types");
 			String abstractText = FileUtils.readFileToString(
@@ -48,17 +48,17 @@ public class TokenAnnotatorTest2 // extends TestCase {
 			cas.setDocumentText(abstractText);
 			sentenceAE.process(cas);
 			Collection<Token> tokens = JCasUtil.select(cas, Token.class);
-			// for (Token token : tokens) {
-			// System.out.println(token.getCoveredText());
-			// }
-			// System.out.println("token number: " + tokens.size());
+			 for (Token token : tokens) {
+			 System.out.println(token.getCoveredText());
+			 }
+			 System.out.println("token number: " + tokens.size());
 
 			JFSIndexRepository indexes = cas.getJFSIndexRepository();
 			Iterator<?> sentIter = indexes.getAnnotationIndex(Token.type).iterator();
 			String offsets = getSentenceOffsets(sentIter);
 			System.out.println(offsets);
 		} else {
-			System.out.println("usage: <path to text file>");
+			System.out.println("usage: <path to text file> <path to model file>");
 		}
 		// assertEquals(19, sentences.size());
 	}
